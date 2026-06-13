@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import authService from '../../services/authService';
 
-export default function LoginForm({ onSwitchToSignup }) {
+export default function LoginForm({ onSwitchToSignup, onLoginSuccess }) {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [error, setError] = useState('');
@@ -12,8 +12,8 @@ export default function LoginForm({ onSwitchToSignup }) {
         setLoading(true);
         setError('');
         try {
-            await authService.login(email, password);
-            alert('Login Successful! Welcome back!');
+            const data = await authService.login(email, password);
+            onLoginSuccess(data);
         } catch (err) {
             setError('Invalid email or password!');
         }
