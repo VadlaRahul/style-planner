@@ -2,6 +2,7 @@ import { useState } from 'react';
 import LoginForm from './components/auth/LoginForm';
 import SignupForm from './components/auth/SignupForm';
 import OnboardingForm from './components/onboarding/OnboardingForm';
+import DashboardLayout from './components/dashboard/DashboardLayout';
 
 export default function App() {
     const [page, setPage] = useState('login');
@@ -36,16 +37,7 @@ export default function App() {
                 />
             )}
             {page === 'dashboard' && (
-                <div style={{
-                    display: 'flex',
-                    justifyContent: 'center',
-                    alignItems: 'center',
-                    height: '100vh',
-                    fontSize: '24px',
-                    color: '#6366f1'
-                }}>
-                    🎉 Welcome to Dashboard! Coming soon...
-                </div>
+                <DashboardLayout user={user} />
             )}
         </div>
     );
