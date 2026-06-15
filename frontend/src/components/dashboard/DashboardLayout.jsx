@@ -2,7 +2,7 @@ import { useState } from 'react';
 import ControlPanel from './ControlPanel';
 import AvatarViewport from './AvatarViewport';
 
-export default function DashboardLayout({ user }) {
+export default function DashboardLayout({ user, onLogout }) {
     const [selectedItems, setSelectedItems] = useState({
         top: null,
         bottom: null,
@@ -55,7 +55,7 @@ export default function DashboardLayout({ user }) {
                         Welcome, {user?.fullName || 'User'}!
                     </span>
                     <button
-                        onClick={() => window.location.reload()}
+                       onClick={onLogout}
                         style={{
                             backgroundColor: '#6366f1',
                             color: 'white',

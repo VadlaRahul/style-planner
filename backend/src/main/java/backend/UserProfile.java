@@ -36,6 +36,7 @@ public class UserProfile {
 
     private String skinTone;
 
+    @Column(columnDefinition = "LONGTEXT")
     private String selfiePath;
 
     private String preferredStyle;

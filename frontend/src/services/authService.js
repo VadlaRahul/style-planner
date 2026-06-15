@@ -9,7 +9,13 @@ const signup = async (email, password, fullName) => {
         fullName
     });
     if (response.data.token) {
-        localStorage.setItem('user', JSON.stringify(response.data));
+        const userData = {
+            ...response.data,
+            email: email,
+            fullName: fullName
+        };
+        localStorage.setItem('user', JSON.stringify(userData));
+        return userData;
     }
     return response.data;
 };
@@ -20,7 +26,13 @@ const login = async (email, password) => {
         password
     });
     if (response.data.token) {
-        localStorage.setItem('user', JSON.stringify(response.data));
+        const userData = {
+            ...response.data,
+            email: email,
+            fullName: response.data.fullName || email
+        };
+        localStorage.setItem('user', JSON.stringify(userData));
+        return userData;
     }
     return response.data;
 };
@@ -30,7 +42,8 @@ const logout = () => {
 };
 
 const getCurrentUser = () => {
-    return JSON.parse(localStorage.getItem('user'));
+    const user = localStorage.getItem('user');
+    return user ? JSON.parse(user) : null;
 };
 
 const authService = { signup, login, logout, getCurrentUser };

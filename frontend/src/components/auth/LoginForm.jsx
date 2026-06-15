@@ -13,7 +13,15 @@ export default function LoginForm({ onSwitchToSignup, onLoginSuccess }) {
         setError('');
         try {
             const data = await authService.login(email, password);
-            onLoginSuccess(data);
+            console.log('Login response:', data);
+            // Always include email in user object
+            const userData = {
+                ...data,
+                email: email,
+                fullName: data.fullName || email
+            };
+            console.log('User data being passed:', userData);
+            onLoginSuccess(userData);
         } catch (err) {
             setError('Invalid email or password!');
         }
@@ -44,7 +52,12 @@ export default function LoginForm({ onSwitchToSignup, onLoginSuccess }) {
                 </h2>
 
                 {error && (
-                    <p style={{ color: 'red', textAlign: 'center' }}>{error}</p>
+                    <p style={{
+                        color: 'red',
+                        textAlign: 'center'
+                    }}>
+                        {error}
+                    </p>
                 )}
 
                 <form onSubmit={handleLogin}>
@@ -116,7 +129,11 @@ export default function LoginForm({ onSwitchToSignup, onLoginSuccess }) {
                     </button>
                 </form>
 
-                <p style={{ textAlign: 'center', marginTop: '15px', color: '#555' }}>
+                <p style={{
+                    textAlign: 'center',
+                    marginTop: '15px',
+                    color: '#555'
+                }}>
                     Don't have an account?{' '}
                     <button
                         onClick={onSwitchToSignup}

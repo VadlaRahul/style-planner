@@ -20,22 +20,24 @@ public class ProfileController {
     @Autowired
     private ProfileService profileService;
 
-    @PostMapping("/onboard")
-    public ResponseEntity<?> onboard(@RequestBody Map<String, Object> request) {
-        try {
-            Map<String, Object> response = profileService.saveProfile(
-                (String) request.get("email"),
-                Double.parseDouble(request.get("heightCm").toString()),
-                Double.parseDouble(request.get("weightKg").toString()),
-                (String) request.get("bodyType"),
-                (String) request.get("preferredStyle"),
-                (String) request.get("locationCity")
-            );
-            return ResponseEntity.ok(response);
-        } catch (Exception e) {
-            return ResponseEntity.badRequest().body(e.getMessage());
-        }
+   @PostMapping("/onboard")
+public ResponseEntity<?> onboard(@RequestBody Map<String, Object> request) {
+    try {
+        Map<String, Object> response = profileService.saveProfile(
+            (String) request.get("email"),
+            Double.parseDouble(request.get("heightCm").toString()),
+            Double.parseDouble(request.get("weightKg").toString()),
+            (String) request.get("bodyType"),
+            (String) request.get("preferredStyle"),
+            (String) request.get("locationCity"),
+            (String) request.get("gender"),
+            (String) request.get("avatarUrl")
+        );
+        return ResponseEntity.ok(response);
+    } catch (Exception e) {
+        return ResponseEntity.badRequest().body(e.getMessage());
     }
+}
 
     @GetMapping("/me")
     public ResponseEntity<?> getProfile(@RequestParam String email) {

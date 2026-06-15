@@ -21,41 +21,58 @@ public class ProfileService {
             Double weightKg,
             String bodyType,
             String preferredStyle,
-            String locationCity) {
+            String locationCity,
+            String gender,
+            String avatarUrl) {
 
-        User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("User not found!"));
+        try {
+            User user = userRepository.findByEmail(email)
+                    .orElseThrow(() ->
+                        new RuntimeException("User not found!"));
 
-        UserProfile profile = userProfileRepository
-                .findByUserId(user.getId())
-                .orElse(new UserProfile());
+            UserProfile profile = userProfileRepository
+                    .findByUserId(user.getId())
+                    .orElse(new UserProfile());
 
-        profile.setUser(user);
-        profile.setHeightCm(heightCm);
-        profile.setWeightKg(weightKg);
-        profile.setBodyType(bodyType);
-        profile.setPreferredStyle(preferredStyle);
-        profile.setLocationCity(locationCity);
-        profile.setOnboardingDone(true);
+            profile.setUser(user);
+            profile.setHeightCm(heightCm);
+            profile.setWeightKg(weightKg);
+            profile.setOnboardingDone(true);
 
-        userProfileRepository.save(profile);
+            if (bodyType != null) profile.setBodyType(bodyType);
+            if (preferredStyle != null)
+                profile.setPreferredStyle(preferredStyle);
+            if (locationCity != null)
+                profile.setLocationCity(locationCity);
+            if (gender != null) profile.setSkinTone(gender);
+            if (avatarUrl != null) profile.setSelfiePath(avatarUrl);
 
-        Map<String, Object> response = new HashMap<>();
-        response.put("message", "Profile saved successfully!");
-        response.put("email", email);
-        response.put("heightCm", heightCm);
-        response.put("weightKg", weightKg);
-        response.put("onboardingDone", true);
-        return response;
+            userProfileRepository.save(profile);
+
+            Map<String, Object> response = new HashMap<>();
+            response.put("message", "Profile saved successfully!");
+            response.put("email", email);
+            response.put("heightCm", heightCm);
+            response.put("weightKg", weightKg);
+            response.put("onboardingDone", true);
+            return response;
+
+        } catch (Exception e) {
+            throw new RuntimeException(
+                "Failed to save profile: " + e.getMessage()
+            );
+        }
     }
 
     public Map<String, Object> getProfile(String email) {
         User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("User not found!"));
+                .orElseThrow(() ->
+                    new RuntimeException("User not found!"));
 
         UserProfile profile = userProfileRepository
                 .findByUserId(user.getId())
-                .orElseThrow(() -> new RuntimeException("Profile not found!"));
+                .orElseThrow(() ->
+                    new RuntimeException("Profile not found!"));
 
         Map<String, Object> response = new HashMap<>();
         response.put("email", email);
@@ -66,6 +83,8 @@ public class ProfileService {
         response.put("preferredStyle", profile.getPreferredStyle());
         response.put("locationCity", profile.getLocationCity());
         response.put("onboardingDone", profile.getOnboardingDone());
+        response.put("gender", profile.getSkinTone());
+        response.put("avatarUrl", profile.getSelfiePath());
         return response;
     }
 }
