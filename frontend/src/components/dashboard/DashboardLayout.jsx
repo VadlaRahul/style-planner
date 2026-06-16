@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import ControlPanel from './ControlPanel';
 import AvatarViewport from './AvatarViewport';
+import UploadModal from '../wardrobe/UploadModal';
 
 export default function DashboardLayout({ user, onLogout }) {
     const [selectedItems, setSelectedItems] = useState({
@@ -9,12 +10,18 @@ export default function DashboardLayout({ user, onLogout }) {
         footwear: null,
         outerwear: null
     });
+    const [showUpload, setShowUpload] = useState(false);
 
     const handleSelectItem = (category, item) => {
         setSelectedItems(prev => ({
             ...prev,
             [category.toLowerCase()]: item
         }));
+    };
+
+    const handleUploadSuccess = (item) => {
+        console.log('New item uploaded:', item);
+        setShowUpload(false);
     };
 
     return (
@@ -24,7 +31,7 @@ export default function DashboardLayout({ user, onLogout }) {
             backgroundColor: '#1a1a2e',
             fontFamily: 'Arial, sans-serif'
         }}>
-            {/* Top Navbar */}
+            {/* Navbar */}
             <div style={{
                 position: 'fixed',
                 top: 0,
@@ -51,11 +58,14 @@ export default function DashboardLayout({ user, onLogout }) {
                     alignItems: 'center',
                     gap: '10px'
                 }}>
-                    <span style={{ color: '#aaa', fontSize: '14px' }}>
+                    <span style={{
+                        color: '#aaa',
+                        fontSize: '14px'
+                    }}>
                         Welcome, {user?.fullName || 'User'}!
                     </span>
                     <button
-                       onClick={onLogout}
+                        onClick={onLogout}
                         style={{
                             backgroundColor: '#6366f1',
                             color: 'white',
@@ -89,6 +99,7 @@ export default function DashboardLayout({ user, onLogout }) {
                     <ControlPanel
                         onSelectItem={handleSelectItem}
                         selectedItems={selectedItems}
+                        onOpenUpload={() => setShowUpload(true)}
                     />
                 </div>
 
@@ -96,17 +107,23 @@ export default function DashboardLayout({ user, onLogout }) {
                 <div style={{
                     flex: 1,
                     backgroundColor: '#0f3460',
-                    display: 'flex',
-                    flexDirection: 'column',
-                    alignItems: 'center',
-                    justifyContent: 'center',
                     height: 'calc(100vh - 60px)'
                 }}>
                     <AvatarViewport
                         selectedItems={selectedItems}
+                        user={user}
                     />
                 </div>
             </div>
+
+            {/* Upload Modal */}
+            {showUpload && (
+                <UploadModal
+                    onClose={() => setShowUpload(false)}
+                    onUploadSuccess={handleUploadSuccess}
+                    userEmail={user?.email || ''}
+                />
+            )}
         </div>
     );
 }

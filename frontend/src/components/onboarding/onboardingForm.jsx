@@ -47,35 +47,32 @@ export default function OnboardingForm({ user, onComplete }) {
     }
 
     try {
-        // Save profile WITHOUT avatarUrl to avoid database issues
-        const payload = {
-            email: email,
-            heightCm: parseFloat(heightCm),
-            weightKg: parseFloat(weightKg),
-            bodyType: bodyType,
-            preferredStyle: preferredStyle,
-            locationCity: locationCity || '',
-            gender: gender,
-            avatarUrl: 'local'
-        };
-
         await axios.post(
             'http://localhost:8080/api/profile/onboard',
-            payload
+            {
+                email: email,
+                heightCm: parseFloat(heightCm),
+                weightKg: parseFloat(weightKg),
+                bodyType: bodyType,
+                preferredStyle: preferredStyle,
+                locationCity: locationCity || '',
+                gender: gender,
+                avatarUrl: 'local'
+            }
         );
-
-        // Pass avatarUrl directly to dashboard in memory
-        onComplete({
-            heightCm: parseFloat(heightCm),
-            weightKg: parseFloat(weightKg),
-            gender: gender,
-            avatarUrl: avatarUrl || '/models/avatar.glb'
-        });
-
     } catch (err) {
-        console.error('Error:', err);
-        setError('❌ Something went wrong!');
+        console.error('Save error:', err);
+        // Don't show error — just continue to dashboard
     }
+
+    // Always go to dashboard regardless of save result
+    onComplete({
+        heightCm: parseFloat(heightCm),
+        weightKg: parseFloat(weightKg),
+        gender: gender,
+        avatarUrl: avatarUrl || '/models/avatar.glb'
+    });
+
     setLoading(false);
 };
 

@@ -25,24 +25,51 @@ const sampleItems = {
     ]
 };
 
-export default function ControlPanel({ onSelectItem, selectedItems }) {
+export default function ControlPanel({
+    onSelectItem,
+    selectedItems,
+    onOpenUpload
+}) {
     const [activeCategory, setActiveCategory] = useState('TOP');
 
     return (
         <div style={{ padding: '20px' }}>
             <h3 style={{
                 color: '#6366f1',
-                marginBottom: '20px',
+                marginBottom: '15px',
                 fontSize: '18px'
             }}>
                 👗 My Wardrobe
             </h3>
 
+            {/* Upload Button */}
+            <button
+                onClick={onOpenUpload}
+                style={{
+                    width: '100%',
+                    padding: '12px',
+                    backgroundColor: '#6366f1',
+                    color: 'white',
+                    border: 'none',
+                    borderRadius: '8px',
+                    cursor: 'pointer',
+                    fontSize: '14px',
+                    fontWeight: 'bold',
+                    marginBottom: '15px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: '8px'
+                }}
+            >
+                📤 Upload New Item
+            </button>
+
             {/* Category Tabs */}
             <div style={{
                 display: 'flex',
                 gap: '8px',
-                marginBottom: '20px',
+                marginBottom: '15px',
                 flexWrap: 'wrap'
             }}>
                 {categories.map(cat => (
@@ -50,10 +77,9 @@ export default function ControlPanel({ onSelectItem, selectedItems }) {
                         key={cat}
                         onClick={() => setActiveCategory(cat)}
                         style={{
-                            padding: '8px 12px',
+                            padding: '6px 12px',
                             backgroundColor: activeCategory === cat
-                                ? '#6366f1'
-                                : '#0f3460',
+                                ? '#6366f1' : '#0f3460',
                             color: 'white',
                             border: 'none',
                             borderRadius: '5px',
@@ -67,32 +93,36 @@ export default function ControlPanel({ onSelectItem, selectedItems }) {
                 ))}
             </div>
 
-            {/* Clothing Items Grid */}
+            {/* Clothing Items */}
             <div style={{
                 display: 'grid',
                 gridTemplateColumns: '1fr 1fr',
-                gap: '12px'
+                gap: '10px'
             }}>
                 {sampleItems[activeCategory].map(item => {
-                    const isSelected = selectedItems[activeCategory.toLowerCase()]?.id === item.id;
+                    const isSelected =
+                        selectedItems[activeCategory.toLowerCase()]
+                            ?.id === item.id;
                     return (
                         <div
                             key={item.id}
-                            onClick={() => onSelectItem(activeCategory, item)}
+                            onClick={() =>
+                                onSelectItem(activeCategory, item)}
                             style={{
-                                backgroundColor: isSelected ? '#6366f1' : '#0f3460',
+                                backgroundColor: isSelected
+                                    ? '#6366f1' : '#0f3460',
                                 border: isSelected
                                     ? '2px solid #818cf8'
                                     : '2px solid transparent',
                                 borderRadius: '10px',
-                                padding: '15px',
+                                padding: '12px',
                                 cursor: 'pointer',
                                 textAlign: 'center'
                             }}
                         >
                             <div style={{
-                                width: '50px',
-                                height: '50px',
+                                width: '45px',
+                                height: '45px',
                                 backgroundColor: item.color,
                                 borderRadius: '8px',
                                 margin: '0 auto 8px',
@@ -101,7 +131,7 @@ export default function ControlPanel({ onSelectItem, selectedItems }) {
                             <p style={{
                                 color: 'white',
                                 margin: 0,
-                                fontSize: '12px',
+                                fontSize: '11px',
                                 fontWeight: isSelected ? 'bold' : 'normal'
                             }}>
                                 {item.name}
@@ -109,7 +139,7 @@ export default function ControlPanel({ onSelectItem, selectedItems }) {
                             {isSelected && (
                                 <p style={{
                                     color: '#818cf8',
-                                    margin: '4px 0 0',
+                                    margin: '3px 0 0',
                                     fontSize: '10px'
                                 }}>
                                     ✅ Selected
@@ -120,9 +150,9 @@ export default function ControlPanel({ onSelectItem, selectedItems }) {
                 })}
             </div>
 
-            {/* Selected Outfit Summary */}
+            {/* Current Outfit */}
             <div style={{
-                marginTop: '25px',
+                marginTop: '20px',
                 backgroundColor: '#0f3460',
                 borderRadius: '10px',
                 padding: '15px'
@@ -141,14 +171,14 @@ export default function ControlPanel({ onSelectItem, selectedItems }) {
                     }}>
                         <span style={{
                             color: '#aaa',
-                            fontSize: '13px',
+                            fontSize: '12px',
                             textTransform: 'uppercase'
                         }}>
                             {cat}:
                         </span>
                         <span style={{
                             color: item ? '#6366f1' : '#555',
-                            fontSize: '13px'
+                            fontSize: '12px'
                         }}>
                             {item ? item.name : 'None'}
                         </span>
