@@ -1,36 +1,68 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import axios from 'axios';
 
 const categories = ['TOP', 'BOTTOM', 'FOOTWEAR', 'OUTERWEAR'];
-
-const sampleItems = {
-    TOP: [
-        { id: 1, name: 'White T-Shirt', color: '#ffffff' },
-        { id: 2, name: 'Blue Shirt', color: '#4a90d9' },
-        { id: 3, name: 'Black Hoodie', color: '#333333' },
-    ],
-    BOTTOM: [
-        { id: 4, name: 'Blue Jeans', color: '#1a4a7a' },
-        { id: 5, name: 'Black Pants', color: '#222222' },
-        { id: 6, name: 'Khaki Chinos', color: '#c8a96e' },
-    ],
-    FOOTWEAR: [
-        { id: 7, name: 'White Sneakers', color: '#f0f0f0' },
-        { id: 8, name: 'Black Boots', color: '#111111' },
-        { id: 9, name: 'Brown Loafers', color: '#8b5e3c' },
-    ],
-    OUTERWEAR: [
-        { id: 10, name: 'Black Jacket', color: '#1a1a1a' },
-        { id: 11, name: 'Denim Jacket', color: '#3a5f8a' },
-        { id: 12, name: 'Beige Coat', color: '#d4b896' },
-    ]
-};
 
 export default function ControlPanel({
     onSelectItem,
     selectedItems,
-    onOpenUpload
+    onOpenUpload,
+    userEmail
 }) {
     const [activeCategory, setActiveCategory] = useState('TOP');
+    const [clothingItems, setClothingItems] = useState({
+        TOP: [],
+        BOTTOM: [],
+        FOOTWEAR: [],
+        OUTERWEAR: []
+    });
+    const [loading, setLoading] = useState(false);
+
+    // Load clothing items from backend
+    const loadItems = async () => {
+        if (!userEmail) return;
+        setLoading(true);
+        try {
+            const response = await axios.get(
+                `http://localhost:8080/api/clothing/list?email=${userEmail}`
+            );
+            console.log('Loaded items:', response.data);
+
+            // Group by category
+            const grouped = {
+                TOP: [],
+                BOTTOM: [],
+                FOOTWEAR: [],
+                OUTERWEAR: []
+            };
+
+            response.data.forEach(item => {
+                const cat = item.category?.toUpperCase();
+                if (grouped[cat]) {
+                    grouped[cat].push({
+                        id: item.id,
+                        name: item.name,
+                        brand: item.brand,
+                        imagePath: item.imagePath,
+                        color: '#6366f1'
+                    });
+                }
+            });
+
+            setClothingItems(grouped);
+        } catch (err) {
+            console.error('Error loading items:', err);
+        }
+        setLoading(false);
+    };
+
+    useEffect(() => {
+        loadItems();
+    }, [userEmail]);
+
+    const handleUploadSuccess = () => {
+        loadItems(); // Reload after upload
+    };
 
     return (
         <div style={{ padding: '20px' }}>
@@ -55,11 +87,7 @@ export default function ControlPanel({
                     cursor: 'pointer',
                     fontSize: '14px',
                     fontWeight: 'bold',
-                    marginBottom: '15px',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    gap: '8px'
+                    marginBottom: '15px'
                 }}
             >
                 📤 Upload New Item
@@ -68,7 +96,7 @@ export default function ControlPanel({
             {/* Category Tabs */}
             <div style={{
                 display: 'flex',
-                gap: '8px',
+                gap: '6px',
                 marginBottom: '15px',
                 flexWrap: 'wrap'
             }}>
@@ -77,14 +105,14 @@ export default function ControlPanel({
                         key={cat}
                         onClick={() => setActiveCategory(cat)}
                         style={{
-                            padding: '6px 12px',
+                            padding: '6px 10px',
                             backgroundColor: activeCategory === cat
                                 ? '#6366f1' : '#0f3460',
                             color: 'white',
                             border: 'none',
                             borderRadius: '5px',
                             cursor: 'pointer',
-                            fontSize: '12px',
+                            fontSize: '11px',
                             fontWeight: 'bold'
                         }}
                     >
@@ -93,66 +121,126 @@ export default function ControlPanel({
                 ))}
             </div>
 
-            {/* Clothing Items */}
-            <div style={{
-                display: 'grid',
-                gridTemplateColumns: '1fr 1fr',
-                gap: '10px'
-            }}>
-                {sampleItems[activeCategory].map(item => {
-                    const isSelected =
-                        selectedItems[activeCategory.toLowerCase()]
-                            ?.id === item.id;
-                    return (
-                        <div
-                            key={item.id}
-                            onClick={() =>
-                                onSelectItem(activeCategory, item)}
-                            style={{
-                                backgroundColor: isSelected
-                                    ? '#6366f1' : '#0f3460',
-                                border: isSelected
-                                    ? '2px solid #818cf8'
-                                    : '2px solid transparent',
-                                borderRadius: '10px',
-                                padding: '12px',
-                                cursor: 'pointer',
-                                textAlign: 'center'
-                            }}
-                        >
-                            <div style={{
-                                width: '45px',
-                                height: '45px',
-                                backgroundColor: item.color,
-                                borderRadius: '8px',
-                                margin: '0 auto 8px',
-                                border: '1px solid rgba(255,255,255,0.2)'
-                            }} />
-                            <p style={{
-                                color: 'white',
-                                margin: 0,
-                                fontSize: '11px',
-                                fontWeight: isSelected ? 'bold' : 'normal'
-                            }}>
-                                {item.name}
-                            </p>
-                            {isSelected && (
-                                <p style={{
-                                    color: '#818cf8',
-                                    margin: '3px 0 0',
-                                    fontSize: '10px'
+            {/* Loading */}
+            {loading && (
+                <p style={{
+                    color: '#aaa',
+                    textAlign: 'center',
+                    fontSize: '13px'
+                }}>
+                    Loading items...
+                </p>
+            )}
+
+            {/* Clothing Items Grid */}
+            {!loading && clothingItems[activeCategory].length === 0 ? (
+                <div style={{
+                    textAlign: 'center',
+                    padding: '30px 20px',
+                    backgroundColor: '#0f3460',
+                    borderRadius: '10px',
+                    marginBottom: '15px'
+                }}>
+                    <p style={{
+                        color: '#aaa',
+                        fontSize: '13px',
+                        margin: 0
+                    }}>
+                        No {activeCategory} items yet!
+                    </p>
+                    <p style={{
+                        color: '#6366f1',
+                        fontSize: '12px',
+                        margin: '5px 0 0'
+                    }}>
+                        Click Upload to add items
+                    </p>
+                </div>
+            ) : (
+                <div style={{
+                    display: 'grid',
+                    gridTemplateColumns: '1fr 1fr',
+                    gap: '10px',
+                    marginBottom: '15px'
+                }}>
+                    {clothingItems[activeCategory].map(item => {
+                        const isSelected =
+                            selectedItems[activeCategory.toLowerCase()]
+                                ?.id === item.id;
+                        return (
+                            <div
+                                key={item.id}
+                                onClick={() =>
+                                    onSelectItem(activeCategory, item)}
+                                style={{
+                                    backgroundColor: isSelected
+                                        ? '#6366f1' : '#0f3460',
+                                    border: isSelected
+                                        ? '2px solid #818cf8'
+                                        : '2px solid transparent',
+                                    borderRadius: '10px',
+                                    padding: '10px',
+                                    cursor: 'pointer',
+                                    textAlign: 'center'
+                                }}
+                            >
+                                {/* Image */}
+                                <div style={{
+                                    width: '60px',
+                                    height: '60px',
+                                    margin: '0 auto 8px',
+                                    borderRadius: '8px',
+                                    overflow: 'hidden',
+                                    backgroundColor: '#1a1a3e',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center'
                                 }}>
-                                    ✅ Selected
+                                    <span style={{
+                                        fontSize: '30px'
+                                    }}>
+                                        {activeCategory === 'TOP' ? '👕' :
+                                         activeCategory === 'BOTTOM' ? '👖' :
+                                         activeCategory === 'FOOTWEAR' ? '👟' :
+                                         '🧥'}
+                                    </span>
+                                </div>
+
+                                <p style={{
+                                    color: 'white',
+                                    margin: 0,
+                                    fontSize: '11px',
+                                    fontWeight: isSelected
+                                        ? 'bold' : 'normal'
+                                }}>
+                                    {item.name}
                                 </p>
-                            )}
-                        </div>
-                    );
-                })}
-            </div>
+                                {item.brand && (
+                                    <p style={{
+                                        color: '#aaa',
+                                        margin: '2px 0 0',
+                                        fontSize: '10px'
+                                    }}>
+                                        {item.brand}
+                                    </p>
+                                )}
+                                {isSelected && (
+                                    <p style={{
+                                        color: '#818cf8',
+                                        margin: '3px 0 0',
+                                        fontSize: '10px'
+                                    }}>
+                                        ✅ Selected
+                                    </p>
+                                )}
+                            </div>
+                        );
+                    })}
+                </div>
+            )}
 
             {/* Current Outfit */}
             <div style={{
-                marginTop: '20px',
                 backgroundColor: '#0f3460',
                 borderRadius: '10px',
                 padding: '15px'

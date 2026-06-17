@@ -11,6 +11,7 @@ export default function DashboardLayout({ user, onLogout }) {
         outerwear: null
     });
     const [showUpload, setShowUpload] = useState(false);
+    const [refreshKey, setRefreshKey] = useState(0);
 
     const handleSelectItem = (category, item) => {
         setSelectedItems(prev => ({
@@ -19,8 +20,8 @@ export default function DashboardLayout({ user, onLogout }) {
         }));
     };
 
-    const handleUploadSuccess = (item) => {
-        console.log('New item uploaded:', item);
+    const handleUploadSuccess = () => {
+        setRefreshKey(prev => prev + 1);
         setShowUpload(false);
     };
 
@@ -97,9 +98,11 @@ export default function DashboardLayout({ user, onLogout }) {
                     height: 'calc(100vh - 60px)'
                 }}>
                     <ControlPanel
+                        key={refreshKey}
                         onSelectItem={handleSelectItem}
                         selectedItems={selectedItems}
                         onOpenUpload={() => setShowUpload(true)}
+                        userEmail={user?.email || ''}
                     />
                 </div>
 
