@@ -98,12 +98,13 @@ export default function DashboardLayout({ user, onLogout }) {
                     height: 'calc(100vh - 60px)'
                 }}>
                     <ControlPanel
-                        key={refreshKey}
-                        onSelectItem={handleSelectItem}
-                        selectedItems={selectedItems}
-                        onOpenUpload={() => setShowUpload(true)}
-                        userEmail={user?.email || ''}
-                    />
+    key={refreshKey}
+    onSelectItem={handleSelectItem}
+    selectedItems={selectedItems}
+    onOpenUpload={() => setShowUpload(true)}
+    userEmail={user?.email || ''}
+    userCity={user?.locationCity || 'Hyderabad'}
+/>
                 </div>
 
                 {/* Right Side */}

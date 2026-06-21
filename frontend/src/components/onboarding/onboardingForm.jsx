@@ -8,7 +8,9 @@ export default function OnboardingForm({ user, onComplete }) {
     const [weightKg, setWeightKg] = useState('');
     const [bodyType, setBodyType] = useState('AVERAGE');
     const [preferredStyle, setPreferredStyle] = useState('casual');
-    const [locationCity, setLocationCity] = useState('');
+    const [locationCity, setLocationCity] = useState(
+    localStorage.getItem('signupCity') || ''
+     );
     const [gender, setGender] = useState('MALE');
     const [avatarUrl, setAvatarUrl] = useState('');
     const [loading, setLoading] = useState(false);
@@ -26,9 +28,13 @@ export default function OnboardingForm({ user, onComplete }) {
     };
 
     const handleStep1Submit = (e) => {
-        e.preventDefault();
-        setStep(2);
-    };
+    e.preventDefault();
+    if (!locationCity.trim()) {
+        alert('📍 Please enter your city! This is needed for weather-based outfit suggestions.');
+        return;
+    }
+    setStep(2);
+};
 
     const handleAvatarCreated = (url) => {
         setAvatarUrl(url);
@@ -303,20 +309,21 @@ export default function OnboardingForm({ user, onComplete }) {
                                 📍 Your City
                             </label>
                             <input
-                                type="text"
-                                value={locationCity}
-                                onChange={(e) =>
-                                    setLocationCity(e.target.value)}
-                                placeholder="e.g. Hyderabad"
-                                style={{
-                                    width: '100%',
-                                    padding: '10px',
-                                    border: '1px solid #ddd',
-                                    borderRadius: '5px',
-                                    fontSize: '16px',
-                                    boxSizing: 'border-box'
+                             type="text"
+                              value={locationCity}
+                              onChange={(e) =>
+                                setLocationCity(e.target.value)}
+                                  required
+                                   placeholder="e.g. Hyderabad"
+                                     style={{
+                                  width: '100%',
+                              padding: '10px',
+                              border: '1px solid #ddd',
+                                borderRadius: '5px',
+                                 fontSize: '16px',
+                                 boxSizing: 'border-box'
                                 }}
-                            />
+                                />
                         </div>
 
                         <button

@@ -13,15 +13,13 @@ function AvaturnAvatar({ avatarUrl, selectedItems, heightCm, weightKg }) {
         : 22;
     const widthScale = Math.min(Math.max(bmi / 22, 0.85), 1.3);
 
-    // Breathing animation
     useFrame((state) => {
         if (group.current) {
             group.current.position.y =
-                Math.sin(state.clock.elapsedTime * 0.8) * 0.02 - 1.0;
+                Math.sin(state.clock.elapsedTime * 0.8) * 0.02 - 0.8;
         }
     });
 
-    // Apply clothing colors
     useEffect(() => {
         if (!scene) return;
         scene.traverse((child) => {
@@ -58,7 +56,7 @@ function AvaturnAvatar({ avatarUrl, selectedItems, heightCm, weightKg }) {
         <group ref={group}>
             <primitive
                 object={scene}
-                scale={[1.2, 1.2, 1.2]}
+                scale={[widthScale * 1.2, heightScale * 1.2, widthScale * 1.2]}
                 position={[0, -0.8, 0]}
             />
         </group>
@@ -150,7 +148,7 @@ function FallbackAvatar({ selectedItems, gender }) {
 
 // ── Main Component ────────────────────────────────────────
 export default function AvatarViewport({ selectedItems, user }) {
-    const avatarUrl = user?.avatarUrl || '/models/avatar.glb';
+    const avatarUrl = user?.avatarUrl;
     const heightCm = user?.heightCm || 170;
     const weightKg = user?.weightKg || 70;
     const gender = user?.gender || 'MALE';
@@ -187,16 +185,70 @@ export default function AvatarViewport({ selectedItems, user }) {
                 </p>
             </div>
 
+            {/* Outfit Thumbnails Bar */}
+            <div style={{
+                display: 'flex',
+                gap: '10px',
+                padding: '0 20px 8px',
+                justifyContent: 'center',
+                minHeight: '50px'
+            }}>
+                {Object.entries(selectedItems).map(([cat, item]) => (
+                    item && (
+                        <div key={cat} style={{
+                            display: 'flex',
+                            flexDirection: 'column',
+                            alignItems: 'center',
+                            gap: '4px'
+                        }}>
+                            <div style={{
+                                width: '40px',
+                                height: '40px',
+                                borderRadius: '8px',
+                                overflow: 'hidden',
+                                border: '2px solid #6366f1',
+                                backgroundColor: '#1a1a3e'
+                            }}>
+                                {item.imagePath ? (
+                                    <img
+                                        src={`http://localhost:8080/${item.imagePath}`}
+                                        alt={item.name}
+                                        style={{
+                                            width: '100%',
+                                            height: '100%',
+                                            objectFit: 'cover'
+                                        }}
+                                    />
+                                ) : (
+                                    <div style={{
+                                        width: '100%',
+                                        height: '100%',
+                                        backgroundColor: item.color
+                                    }} />
+                                )}
+                            </div>
+                            <span style={{
+                                color: '#aaa',
+                                fontSize: '9px',
+                                textTransform: 'uppercase'
+                            }}>
+                                {cat}
+                            </span>
+                        </div>
+                    )
+                ))}
+            </div>
+
             {/* 3D Canvas */}
             <div style={{ flex: 1 }}>
                 <Canvas
-                    camera={{ position: [0, 1.2, 3.5], fov: 45 }}
+                    camera={{ position: [0, 0.5, 3.5], fov: 50 }}
                     style={{
                         background:
                             'linear-gradient(180deg, #0f3460 0%, #16213e 100%)'
                     }}
                 >
-                    <ambientLight intensity={1.0} />
+                    <ambientLight intensity={0.7} />
                     <directionalLight
                         position={[5, 8, 5]}
                         intensity={1.5}
@@ -245,7 +297,7 @@ export default function AvatarViewport({ selectedItems, user }) {
                         maxDistance={7}
                         minPolarAngle={Math.PI / 6}
                         maxPolarAngle={Math.PI / 1.8}
-                        target={[0, 0.8, 0]}
+                        target={[0, 0.5, 0]}
                         autoRotate
                         autoRotateSpeed={1}
                     />

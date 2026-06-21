@@ -6,6 +6,7 @@ export default function LoginForm({ onSwitchToSignup, onLoginSuccess }) {
     const [password, setPassword] = useState('');
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
+    const [showPassword, setShowPassword] = useState(false);
 
     const handleLogin = async (e) => {
         e.preventDefault();
@@ -87,29 +88,46 @@ export default function LoginForm({ onSwitchToSignup, onLoginSuccess }) {
                     </div>
 
                     <div style={{ marginBottom: '20px' }}>
-                        <label style={{
-                            display: 'block',
-                            marginBottom: '5px',
-                            color: '#555'
-                        }}>
-                            Password
-                        </label>
-                        <input
-                            type="password"
-                            value={password}
-                            onChange={(e) => setPassword(e.target.value)}
-                            required
-                            style={{
-                                width: '100%',
-                                padding: '10px',
-                                border: '1px solid #ddd',
-                                borderRadius: '5px',
-                                fontSize: '16px',
-                                boxSizing: 'border-box'
-                            }}
-                            placeholder="Enter your password"
-                        />
-                    </div>
+    <label style={{
+        display: 'block',
+        marginBottom: '5px',
+        color: '#555'
+    }}>
+        Password
+    </label>
+    <div style={{ position: 'relative' }}>
+        <input
+            type={showPassword ? 'text' : 'password'}
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            required
+            style={{
+                width: '100%',
+                padding: '10px',
+                paddingRight: '40px',
+                border: '1px solid #ddd',
+                borderRadius: '5px',
+                fontSize: '16px',
+                boxSizing: 'border-box'
+            }}
+            placeholder="Enter your password"
+        />
+        <span
+            onClick={() => setShowPassword(!showPassword)}
+            style={{
+                position: 'absolute',
+                right: '12px',
+                top: '50%',
+                transform: 'translateY(-50%)',
+                cursor: 'pointer',
+                fontSize: '18px',
+                userSelect: 'none'
+            }}
+        >
+            {showPassword ? '🙈' : '👁️'}
+        </span>
+    </div>
+</div>
 
                     <button
                         type="submit"

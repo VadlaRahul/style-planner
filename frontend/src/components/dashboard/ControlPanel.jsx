@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import axios from 'axios';
+import WeatherWidget from './WeatherWidget';
 
 const categories = ['TOP', 'BOTTOM', 'FOOTWEAR', 'OUTERWEAR'];
 
@@ -7,7 +8,8 @@ export default function ControlPanel({
     onSelectItem,
     selectedItems,
     onOpenUpload,
-    userEmail
+    userEmail,
+    userCity
 }) {
     const [activeCategory, setActiveCategory] = useState('TOP');
     const [clothingItems, setClothingItems] = useState({
@@ -18,7 +20,6 @@ export default function ControlPanel({
     });
     const [loading, setLoading] = useState(false);
 
-    // Load clothing items from backend
     const loadItems = async () => {
         if (!userEmail) return;
         setLoading(true);
@@ -28,7 +29,6 @@ export default function ControlPanel({
             );
             console.log('Loaded items:', response.data);
 
-            // Group by category
             const grouped = {
                 TOP: [],
                 BOTTOM: [],
@@ -60,12 +60,11 @@ export default function ControlPanel({
         loadItems();
     }, [userEmail]);
 
-    const handleUploadSuccess = () => {
-        loadItems(); // Reload after upload
-    };
-
     return (
         <div style={{ padding: '20px' }}>
+            {/* Weather Widget */}
+            <WeatherWidget city={userCity} />
+
             <h3 style={{
                 color: '#6366f1',
                 marginBottom: '15px',
@@ -184,7 +183,6 @@ export default function ControlPanel({
                                     textAlign: 'center'
                                 }}
                             >
-                                {/* Image */}
                                 <div style={{
                                     width: '60px',
                                     height: '60px',
@@ -196,14 +194,27 @@ export default function ControlPanel({
                                     alignItems: 'center',
                                     justifyContent: 'center'
                                 }}>
-                                    <span style={{
-                                        fontSize: '30px'
-                                    }}>
-                                        {activeCategory === 'TOP' ? '👕' :
-                                         activeCategory === 'BOTTOM' ? '👖' :
-                                         activeCategory === 'FOOTWEAR' ? '👟' :
-                                         '🧥'}
-                                    </span>
+                                    {item.imagePath ? (
+                                        <img
+                                            src={`http://localhost:8080/${item.imagePath}`}
+                                            alt={item.name}
+                                            style={{
+                                                width: '100%',
+                                                height: '100%',
+                                                objectFit: 'cover'
+                                            }}
+                                            onError={(e) => {
+                                                e.target.style.display = 'none';
+                                            }}
+                                        />
+                                    ) : (
+                                        <span style={{ fontSize: '30px' }}>
+                                            {activeCategory === 'TOP' ? '👕' :
+                                             activeCategory === 'BOTTOM' ? '👖' :
+                                             activeCategory === 'FOOTWEAR' ? '👟' :
+                                             '🧥'}
+                                        </span>
+                                    )}
                                 </div>
 
                                 <p style={{
