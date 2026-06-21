@@ -25,6 +25,8 @@ public class ClothingService {
             String name,
             String category,
             String brand,
+            String warmth,
+            String occasion,
             MultipartFile image) throws Exception {
 
         User user = userRepository.findByEmail(email)
@@ -44,6 +46,8 @@ public class ClothingService {
         item.setName(name);
         item.setCategory(category);
         item.setBrand(brand);
+        item.setWarmth(warmth);
+        item.setOccasion(occasion);
         item.setOriginalImagePath(UPLOAD_DIR + fileName);
         clothingItemRepository.save(item);
 
@@ -52,6 +56,8 @@ public class ClothingService {
         response.put("name", name);
         response.put("category", category);
         response.put("brand", brand);
+        response.put("warmth", warmth);
+        response.put("occasion", occasion);
         response.put("imagePath", UPLOAD_DIR + fileName);
         response.put("message", "Uploaded successfully!");
         return response;
@@ -80,6 +86,8 @@ public class ClothingService {
             map.put("name", item.getName());
             map.put("category", item.getCategory());
             map.put("brand", item.getBrand());
+            map.put("warmth", item.getWarmth());
+            map.put("occasion", item.getOccasion());
             map.put("imagePath", item.getOriginalImagePath());
             result.add(map);
         }

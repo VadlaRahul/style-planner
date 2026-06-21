@@ -5,6 +5,8 @@ export default function UploadModal({ onClose, onUploadSuccess, userEmail }) {
     const [name, setName] = useState('');
     const [category, setCategory] = useState('TOP');
     const [brand, setBrand] = useState('');
+    const [warmth, setWarmth] = useState('MEDIUM');
+    const [occasion, setOccasion] = useState('CASUAL');
     const [image, setImage] = useState(null);
     const [preview, setPreview] = useState(null);
     const [loading, setLoading] = useState(false);
@@ -34,6 +36,8 @@ export default function UploadModal({ onClose, onUploadSuccess, userEmail }) {
             formData.append('name', name);
             formData.append('category', category);
             formData.append('brand', brand);
+            formData.append('warmth', warmth);
+            formData.append('occasion', occasion);
             formData.append('email', userEmail);
 
             const response = await axios.post(
@@ -212,12 +216,11 @@ export default function UploadModal({ onClose, onUploadSuccess, userEmail }) {
                             <option value="BOTTOM">👖 Bottom</option>
                             <option value="FOOTWEAR">👟 Footwear</option>
                             <option value="OUTERWEAR">🧥 Outerwear</option>
-                            <option value="ACCESSORY">👜 Accessory</option>
                         </select>
                     </div>
 
                     {/* Brand */}
-                    <div style={{ marginBottom: '20px' }}>
+                    <div style={{ marginBottom: '12px' }}>
                         <label style={{
                             display: 'block',
                             marginBottom: '4px',
@@ -241,6 +244,65 @@ export default function UploadModal({ onClose, onUploadSuccess, userEmail }) {
                                 boxSizing: 'border-box'
                             }}
                         />
+                    </div>
+
+                    {/* Warmth Level */}
+                    <div style={{ marginBottom: '12px' }}>
+                        <label style={{
+                            display: 'block',
+                            marginBottom: '4px',
+                            color: '#555',
+                            fontWeight: 'bold',
+                            fontSize: '14px'
+                        }}>
+                            🌡️ Warmth Level
+                        </label>
+                        <select
+                            value={warmth}
+                            onChange={(e) => setWarmth(e.target.value)}
+                            style={{
+                                width: '100%',
+                                padding: '10px',
+                                border: '1px solid #ddd',
+                                borderRadius: '6px',
+                                fontSize: '14px',
+                                boxSizing: 'border-box'
+                            }}
+                        >
+                            <option value="LIGHT">☀️ Light (Hot weather)</option>
+                            <option value="MEDIUM">🌤️ Medium (Mild weather)</option>
+                            <option value="WARM">🧥 Warm (Cold weather)</option>
+                        </select>
+                    </div>
+
+                    {/* Occasion */}
+                    <div style={{ marginBottom: '20px' }}>
+                        <label style={{
+                            display: 'block',
+                            marginBottom: '4px',
+                            color: '#555',
+                            fontWeight: 'bold',
+                            fontSize: '14px'
+                        }}>
+                            🎯 Best For Occasion
+                        </label>
+                        <select
+                            value={occasion}
+                            onChange={(e) => setOccasion(e.target.value)}
+                            style={{
+                                width: '100%',
+                                padding: '10px',
+                                border: '1px solid #ddd',
+                                borderRadius: '6px',
+                                fontSize: '14px',
+                                boxSizing: 'border-box'
+                            }}
+                        >
+                            <option value="CASUAL">😊 Casual</option>
+                            <option value="FORMAL">👔 Formal</option>
+                            <option value="PARTY">🎉 Party</option>
+                            <option value="WORKOUT">💪 Workout</option>
+                        </select>
                     </div>
 
                     {error && (

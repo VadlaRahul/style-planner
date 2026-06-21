@@ -36,6 +36,10 @@ public class ClothingItem {
 
     private String colorPrimary;
 
+    private String warmth = "MEDIUM";
+
+    private String occasion = "CASUAL";
+
     @Column(columnDefinition = "TEXT")
     private String originalImagePath;
 
