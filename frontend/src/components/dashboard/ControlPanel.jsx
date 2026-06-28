@@ -14,6 +14,11 @@ export default function ControlPanel({
     const [activeCategory, setActiveCategory] = useState('TOP');
     const [occasion, setOccasion] = useState('CASUAL');
     const [suggesting, setSuggesting] = useState(false);
+    const [savedOutfits, setSavedOutfits] = useState([]);
+const [showSaveModal, setShowSaveModal] = useState(false);
+const [outfitName, setOutfitName] = useState('');
+const [lastTemperature, setLastTemperature] = useState(null);
+const [saving, setSaving] = useState(false);
     const [clothingItems, setClothingItems] = useState({
         TOP: [],
         BOTTOM: [],
@@ -85,18 +90,94 @@ export default function ControlPanel({
                 }
             });
 
-            alert(
-                `🎉 Outfit suggested!\n` +
-                `🌡️ Temperature: ${Math.round(result.temperature)}°C\n` +
-                `👔 Occasion: ${occasion}`
-            );
+            setLastTemperature(result.temperature);
+          alert(
+    `🎉 Outfit suggested!\n` +
+    `🌡️ Temperature: ${Math.round(result.temperature)}°C\n` +
+    `👔 Occasion: ${occasion}`
+          );
         } catch (err) {
             console.error('Suggestion error:', err);
             alert('Could not suggest outfit. Try uploading more items!');
         }
         setSuggesting(false);
     };
+   const loadSavedOutfits = async () => {
+    try {
+        const response = await axios.get(
+            `http://localhost:8080/api/outfit/list?email=${userEmail}`
+        );
+        setSavedOutfits(response.data);
+    } catch (err) {
+        console.error('Error loading saved outfits:', err);
+    }
+};
 
+useEffect(() => {
+    loadSavedOutfits();
+}, [userEmail]);
+
+const handleSaveOutfit = async () => {
+    if (!outfitName.trim()) {
+        alert('Please enter a name for this outfit!');
+        return;
+    }
+
+    const hasAnyItem = Object.values(selectedItems)
+        .some(item => item !== null);
+    if (!hasAnyItem) {
+        alert('Please select at least one clothing item first!');
+        return;
+    }
+
+    setSaving(true);
+    try {
+        const items = {};
+        Object.entries(selectedItems).forEach(([cat, item]) => {
+            if (item) items[cat] = item.id;
+        });
+
+        await axios.post('http://localhost:8080/api/outfit/save', {
+            email: userEmail,
+            name: outfitName,
+            occasion: occasion,
+            temperature: lastTemperature,
+            items: items
+        });
+
+        alert('✅ Outfit saved successfully!');
+        setOutfitName('');
+        setShowSaveModal(false);
+        loadSavedOutfits();
+    } catch (err) {
+        console.error('Save error:', err);
+        alert('Failed to save outfit!');
+    }
+    setSaving(false);
+};
+
+const handleLoadOutfit = (outfit) => {
+    outfit.items.forEach(item => {
+        onSelectItem(item.category, {
+            id: item.id,
+            name: item.name,
+            imagePath: item.imagePath,
+            color: '#6366f1'
+        });
+    });
+    alert(`✅ Loaded outfit: ${outfit.name}`);
+};
+
+const handleDeleteOutfit = async (id, e) => {
+    e.stopPropagation();
+    if (!window.confirm('Delete this outfit?')) return;
+    try {
+        await axios.delete(`http://localhost:8080/api/outfit/${id}`);
+        loadSavedOutfits();
+    } catch (err) {
+        console.error('Delete error:', err);
+    }
+};
     return (
         <div style={{ padding: '20px' }}>
             {/* Weather Widget */}
@@ -341,39 +422,213 @@ export default function ControlPanel({
             )}
 
             {/* Current Outfit */}
-            <div style={{
-                backgroundColor: '#0f3460',
-                borderRadius: '10px',
-                padding: '15px'
+<div style={{
+    backgroundColor: '#0f3460',
+    borderRadius: '10px',
+    padding: '15px',
+    marginBottom: '15px'
+}}>
+    <h4 style={{
+        color: '#6366f1',
+        margin: '0 0 10px'
+    }}>
+        👔 Current Outfit
+    </h4>
+    {Object.entries(selectedItems).map(([cat, item]) => (
+        <div key={cat} style={{
+            display: 'flex',
+            justifyContent: 'space-between',
+            marginBottom: '5px'
+        }}>
+            <span style={{
+                color: '#aaa',
+                fontSize: '12px',
+                textTransform: 'uppercase'
             }}>
-                <h4 style={{
-                    color: '#6366f1',
-                    margin: '0 0 10px'
-                }}>
-                    👔 Current Outfit
-                </h4>
-                {Object.entries(selectedItems).map(([cat, item]) => (
-                    <div key={cat} style={{
+                {cat}:
+            </span>
+            <span style={{
+                color: item ? '#6366f1' : '#555',
+                fontSize: '12px'
+            }}>
+                {item ? item.name : 'None'}
+            </span>
+        </div>
+    ))}
+
+    <button
+        onClick={() => setShowSaveModal(true)}
+        style={{
+            width: '100%',
+            padding: '10px',
+            backgroundColor: '#10b981',
+            color: 'white',
+            border: 'none',
+            borderRadius: '6px',
+            cursor: 'pointer',
+            fontSize: '13px',
+            fontWeight: 'bold',
+            marginTop: '10px'
+        }}
+    >
+        💾 Save This Outfit
+    </button>
+</div>
+
+{/* Save Outfit Modal */}
+{showSaveModal && (
+    <div style={{
+        position: 'fixed',
+        top: 0, left: 0, right: 0, bottom: 0,
+        backgroundColor: 'rgba(0,0,0,0.7)',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        zIndex: 1000
+    }}>
+        <div style={{
+            backgroundColor: '#16213e',
+            borderRadius: '12px',
+            padding: '25px',
+            width: '320px'
+        }}>
+            <h3 style={{
+                color: '#6366f1',
+                margin: '0 0 15px'
+            }}>
+                💾 Save Outfit
+            </h3>
+            <input
+                type="text"
+                value={outfitName}
+                onChange={(e) => setOutfitName(e.target.value)}
+                placeholder="e.g. Office Look"
+                style={{
+                    width: '100%',
+                    padding: '10px',
+                    borderRadius: '6px',
+                    border: '1px solid #6366f1',
+                    backgroundColor: '#0f3460',
+                    color: 'white',
+                    marginBottom: '15px',
+                    boxSizing: 'border-box'
+                }}
+            />
+            <div style={{ display: 'flex', gap: '10px' }}>
+                <button
+                    onClick={handleSaveOutfit}
+                    disabled={saving}
+                    style={{
+                        flex: 1,
+                        padding: '10px',
+                        backgroundColor: '#10b981',
+                        color: 'white',
+                        border: 'none',
+                        borderRadius: '6px',
+                        cursor: 'pointer',
+                        fontWeight: 'bold'
+                    }}
+                >
+                    {saving ? 'Saving...' : 'Save'}
+                </button>
+                <button
+                    onClick={() => setShowSaveModal(false)}
+                    style={{
+                        flex: 1,
+                        padding: '10px',
+                        backgroundColor: 'transparent',
+                        border: '1px solid #6366f1',
+                        color: '#6366f1',
+                        borderRadius: '6px',
+                        cursor: 'pointer'
+                    }}
+                >
+                    Cancel
+                </button>
+            </div>
+        </div>
+    </div>
+)}
+
+{/* Saved Outfits Gallery */}
+<div style={{
+    backgroundColor: '#0f3460',
+    borderRadius: '10px',
+    padding: '15px'
+}}>
+    <h4 style={{
+        color: '#6366f1',
+        margin: '0 0 10px'
+    }}>
+        📁 My Saved Outfits
+    </h4>
+    {savedOutfits.length === 0 ? (
+        <p style={{
+            color: '#aaa',
+            fontSize: '12px',
+            textAlign: 'center',
+            margin: 0
+        }}>
+            No saved outfits yet!
+        </p>
+    ) : (
+        <div style={{
+            display: 'flex',
+            flexDirection: 'column',
+            gap: '8px'
+        }}>
+            {savedOutfits.map(outfit => (
+                <div
+                    key={outfit.id}
+                    onClick={() => handleLoadOutfit(outfit)}
+                    style={{
+                        backgroundColor: '#1a1a3e',
+                        borderRadius: '8px',
+                        padding: '10px',
+                        cursor: 'pointer',
                         display: 'flex',
                         justifyContent: 'space-between',
-                        marginBottom: '5px'
-                    }}>
-                        <span style={{
+                        alignItems: 'center'
+                    }}
+                >
+                    <div>
+                        <p style={{
+                            color: 'white',
+                            margin: 0,
+                            fontSize: '13px',
+                            fontWeight: 'bold'
+                        }}>
+                            {outfit.name}
+                        </p>
+                        <p style={{
                             color: '#aaa',
-                            fontSize: '12px',
-                            textTransform: 'uppercase'
+                            margin: '2px 0 0',
+                            fontSize: '10px'
                         }}>
-                            {cat}:
-                        </span>
-                        <span style={{
-                            color: item ? '#6366f1' : '#555',
-                            fontSize: '12px'
-                        }}>
-                            {item ? item.name : 'None'}
-                        </span>
+                            {outfit.occasion} •{' '}
+                            {outfit.temperature
+                                ? Math.round(outfit.temperature) + '°C'
+                                : ''}
+                            {' '}• {outfit.items.length} items
+                        </p>
                     </div>
-                ))}
-            </div>
+                    <button
+                        onClick={(e) => handleDeleteOutfit(outfit.id, e)}
+                        style={{
+                            background: 'none',
+                            border: 'none',
+                            color: '#ff6b6b',
+                            cursor: 'pointer',
+                            fontSize: '16px'
+                        }}
+                    >
+                        🗑️
+                    </button>
+                </div>
+            ))}
+        </div>
+    )}
+</div>
         </div>
     );
 }
