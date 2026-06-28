@@ -97,4 +97,4 @@ public class ClothingService {
     public void deleteClothingItem(Long id) {
         clothingItemRepository.deleteById(id);
     }
-}
+} 

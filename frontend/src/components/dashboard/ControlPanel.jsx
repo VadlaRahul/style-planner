@@ -12,6 +12,8 @@ export default function ControlPanel({
     userCity
 }) {
     const [activeCategory, setActiveCategory] = useState('TOP');
+    const [occasion, setOccasion] = useState('CASUAL');
+    const [suggesting, setSuggesting] = useState(false);
     const [clothingItems, setClothingItems] = useState({
         TOP: [],
         BOTTOM: [],
@@ -60,6 +62,41 @@ export default function ControlPanel({
         loadItems();
     }, [userEmail]);
 
+    const handleSuggestOutfit = async () => {
+        setSuggesting(true);
+        try {
+            const response = await axios.get(
+                `http://localhost:8080/api/outfit/suggest?email=${userEmail}&city=${userCity}&occasion=${occasion}`
+            );
+            console.log('Suggested outfit:', response.data);
+
+            const result = response.data;
+            const cats = ['top', 'bottom', 'footwear', 'outerwear'];
+
+            cats.forEach(cat => {
+                if (result[cat]) {
+                    onSelectItem(cat.toUpperCase(), {
+                        id: result[cat].id,
+                        name: result[cat].name,
+                        brand: result[cat].brand,
+                        imagePath: result[cat].imagePath,
+                        color: '#6366f1'
+                    });
+                }
+            });
+
+            alert(
+                `🎉 Outfit suggested!\n` +
+                `🌡️ Temperature: ${Math.round(result.temperature)}°C\n` +
+                `👔 Occasion: ${occasion}`
+            );
+        } catch (err) {
+            console.error('Suggestion error:', err);
+            alert('Could not suggest outfit. Try uploading more items!');
+        }
+        setSuggesting(false);
+    };
+
     return (
         <div style={{ padding: '20px' }}>
             {/* Weather Widget */}
@@ -72,6 +109,59 @@ export default function ControlPanel({
             }}>
                 👗 My Wardrobe
             </h3>
+
+            {/* Occasion Selector */}
+            <div style={{ marginBottom: '12px' }}>
+                <label style={{
+                    display: 'block',
+                    marginBottom: '4px',
+                    color: '#aaa',
+                    fontSize: '12px'
+                }}>
+                    🎯 Occasion
+                </label>
+                <select
+                    value={occasion}
+                    onChange={(e) => setOccasion(e.target.value)}
+                    style={{
+                        width: '100%',
+                        padding: '8px',
+                        backgroundColor: '#0f3460',
+                        color: 'white',
+                        border: '1px solid #6366f1',
+                        borderRadius: '6px',
+                        fontSize: '13px'
+                    }}
+                >
+                    <option value="CASUAL">😊 Casual</option>
+                    <option value="FORMAL">👔 Formal</option>
+                    <option value="PARTY">🎉 Party</option>
+                    <option value="WORKOUT">💪 Workout</option>
+                </select>
+            </div>
+
+            {/* Suggest Outfit Button */}
+            <button
+                onClick={handleSuggestOutfit}
+                disabled={suggesting}
+                style={{
+                    width: '100%',
+                    padding: '12px',
+                    background: 'linear-gradient(135deg, #f59e0b, #f97316)',
+                    color: 'white',
+                    border: 'none',
+                    borderRadius: '8px',
+                    cursor: 'pointer',
+                    fontSize: '14px',
+                    fontWeight: 'bold',
+                    marginBottom: '15px'
+                }}
+            >
+                {suggesting
+                    ? '⏳ Finding best outfit...'
+                    : '✨ Suggest Outfit for Today!'
+                }
+            </button>
 
             {/* Upload Button */}
             <button

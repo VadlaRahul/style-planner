@@ -52,6 +52,7 @@ public class SecurityConfig {
                 .requestMatchers("/api/clothing/**").permitAll()
                 .requestMatchers("/api/weather/**").permitAll()
                 .requestMatchers("/uploads/**").permitAll()
+                .requestMatchers("/api/outfit/**").permitAll()
                 .anyRequest().authenticated()
             );
         return http.build();
